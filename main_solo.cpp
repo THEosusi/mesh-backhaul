@@ -73,7 +73,10 @@ int main(int argc, char *argv[])
 	static int node = atoi(argv[1]);
 	static int node_except = node - 1;
 	static int SOURCE = 44;
-	static int DIST = 18;
+	vector<int> DIST = {18,37};
+
+	// flag for DIST
+	bool fig_DIST = false;
 
 	// Iteration
 	static int num_loop = 0; // Setting
@@ -110,15 +113,21 @@ int main(int argc, char *argv[])
 		// Consider the case where the source and destination change during the loop.
 		// The following process* is described in the loop.
 		Q_Kirchhoff[SOURCE] = Q_allFlow;
-		Q_Kirchhoff[DIST] = Q_allFlow * NEG;
-
+		for(int i=0;i<DIST.size();i++){
+			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1 / DIST.size()); // SOUCE LEN is 1 あとでへんこう
+		}
 		for (i = 0; i < node; i++)
 		{
 			pressureCoefficient[i][i] = 0.0;
-			if (i != SOURCE && i != DIST)
-			{
+			for(int j=0;j<DIST.size();j++){
+				if (i == SOURCE || i == DIST[j]){
+					fig_DIST=true;
+				}
+			}
+			if (!fig_DIST){
 				Q_Kirchhoff[i] = 0.0;
 			}
+			fig_DIST=false;
 		}
 		// The following process* end
 
@@ -150,35 +159,55 @@ int main(int argc, char *argv[])
 			}
 			k++;
 		}
-
 		for (i = 0, a = 0; i < node, a < node_except; i++, a++)
-		{
-			if (i == DIST && DIST != node)
-			{
+		{	
+			for(int k=0;k<DIST.size();k++){
+				if (i == DIST[k] && DIST[k] != node)
+				{
+					fig_DIST=true;
+				}
+			}
+			if(fig_DIST){
 				i++;
 			}
+			fig_DIST=false;
 			for (j = 0, b = 0; j < node, b < node_except; j++, b++)
 			{
-				if (j == DIST)
+
+				for(int k=0;k<DIST.size();k++){
+					if(j==DIST[k]){
+						fig_DIST=true;
+					}
+				}
+				if (fig_DIST)
 				{
 					j++;
 					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
+					cout<<"bb"<<j<<endl;
 				}
-				else if (j != DIST)
+				else
 				{
 					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
+					cout<<"aa"<<j<<endl;
 				}
+				fig_DIST=false;
 			}
 		}
-
 		a = 0;
 		for (i = 0; i < node; i++)
 		{
-			if (i != DIST)
+			for(int k=0;k<DIST.size();k++){
+				if(i==DIST[k]){
+					fig_DIST=true;
+				}
+			}
+
+			if (!fig_DIST)
 			{
 				Q_Kirchhoff_sinkExcept[a] = Q_Kirchhoff[i];
 				a++;
 			}
+			fig_DIST=false;
 		}
 
 		// ICCG:Incomplete Cholesky Conjugate Gradient method
@@ -191,7 +220,12 @@ int main(int argc, char *argv[])
 		a = 0;
 		for (i = 0; i < node; i++)
 		{
-			if (i == DIST)
+			for(int j=0;j<DIST.size();j++){
+				if(i==DIST[j]){
+					fig_DIST=true;
+				}
+			}
+			if (fig_DIST)
 			{
 				P_tubePressure[i] = 0.0;
 			}
@@ -200,6 +234,7 @@ int main(int argc, char *argv[])
 				P_tubePressure[i] = P_tubePressure_sinkExcept[a];
 				a++;
 			}
+			fig_DIST=false;
 		}
 		// Derive pressure gradient for each tube by simultaneous equations
 		// End
