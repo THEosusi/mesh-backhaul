@@ -52,7 +52,7 @@ vector<double> green;
 vector<double> blue;
 
 // Prototype declaration
-void Initialize(int);
+void Initialize(int,int);
 void VectorFree(int);
 
 // Program Start
@@ -70,10 +70,10 @@ int main(int argc, char *argv[])
 	static int a, b = 0;
 
 	// Node
-	static int node = atoi(argv[1]);
-	static int node_except = node - 1;
 	static int SOURCE = 44;
 	vector<int> DIST = {18,37};
+	static int node = atoi(argv[1]);
+	static int node_except = node - DIST.size();
 
 	// flag for DIST
 	bool fig_DIST = false;
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 	const char *NET_file = argv[2];
 
 	// Vectors initialization
-	Initialize(node);
+	Initialize(node, node_except);
 
 	// Create simulation topology for Pajek
 	NodeConfigure(NET_file, node, SOURCE, DIST, x_coordinate, y_coordinate, D_tubeThickness, L_tubeLength, node_distance);
@@ -305,10 +305,10 @@ int main(int argc, char *argv[])
 }
 
 // vector initialize
-void Initialize(int node)
+void Initialize(int node, int dist)
 {
 
-	int node_except = node - 1;
+	int node_except = node - dist;
 
 	// 1xN matrix
 	// Basis parameter
