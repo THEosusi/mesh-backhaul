@@ -183,16 +183,17 @@ int main(int argc, char *argv[])
 				{
 					j++;
 					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
-					cout<<"bb"<<j<<endl;
+					cout<<"ww"<<a<<"ww"<<b<<endl;
 				}
 				else
 				{
 					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
-					cout<<"aa"<<j<<endl;
+					cout<<"oo"<<a<<"ww"<<b<<endl;
 				}
 				fig_DIST=false;
 			}
 		}
+		cout<<"cc"<<endl;
 		a = 0;
 		for (i = 0; i < node; i++)
 		{
