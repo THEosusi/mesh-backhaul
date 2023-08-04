@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 			Q_Kirchhoff[SOURCE[i]] = Flow_SOURCE[i];
 		}
 		for(int i=0;i<DIST.size();i++){
-			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( SOURCE.size() / DIST.size()); // SOUCE LEN is 1 あとでへんこう
+			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1.0 / DIST.size()); 
 		}
 		for (i = 0; i < node; i++)
 		{
@@ -310,8 +310,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
-		cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
+		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
 		/*for(int i=0;i<node;i++){
 			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
 		}*/
