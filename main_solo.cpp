@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 	// Node
 	static int SOURCE = 44;
-	vector<int> DIST = {18,37};
+	vector<int> DIST = {18.37};
 	static int node = atoi(argv[1]);
 	static int node_except = node - DIST.size();
 
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 		// The following process* is described in the loop.
 		Q_Kirchhoff[SOURCE] = Q_allFlow;
 		for(int i=0;i<DIST.size();i++){
-			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1 / DIST.size()); // SOUCE LEN is 1 あとでへんこう
+			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1.0 / DIST.size()); // SOUCE LEN is 1 あとでへんこう
 		}
 		for (i = 0; i < node; i++)
 		{
@@ -182,18 +182,15 @@ int main(int argc, char *argv[])
 				if (fig_DIST)
 				{
 					j++;
-					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
-					cout<<"ww"<<a<<"ww"<<b<<endl;
+					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];// it may happen an error especially in case multi sink and a and b.
 				}
 				else
 				{
 					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
-					cout<<"oo"<<a<<"ww"<<b<<endl;
 				}
 				fig_DIST=false;
 			}
 		}
-		cout<<"cc"<<endl;
 		a = 0;
 		for (i = 0; i < node; i++)
 		{
@@ -289,7 +286,12 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
-		cout<<Q_tubeFlow[44][43]<<"aaa"<<Q_tubeFlow[44][36]<<"aaa"<<Q_tubeFlow[44][52]<<"aaa"<<Q_tubeFlow[44][45]<<endl;
+
+		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
+		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		/*for(int i=0;i<node;i++){
+			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
+		}*/
 
 		// Write here the process you want to do every 'plot' times
 		if ((ct + 1) % plot == 0)
@@ -306,10 +308,8 @@ int main(int argc, char *argv[])
 }
 
 // vector initialize
-void Initialize(int node, int dist)
+void Initialize(int node, int node_except)
 {
-
-	int node_except = node - dist;
 
 	// 1xN matrix
 	// Basis parameter
