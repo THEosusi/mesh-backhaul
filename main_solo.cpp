@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
 	// Node
 	static int SOURCE = 44;
-	vector<int> DIST = {18.37};
+	vector<int> DIST = {18,37,60};
 	static int node = atoi(argv[1]);
 	static int node_except = node - DIST.size();
 
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 		/*for(int i=0;i<node;i++){
 			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
 		}*/
-
+		//cout<<Q_tubeFlow[52][60]<<"aaa"<<Q_tubeFlow[59][60]<<"aaa"<<Q_tubeFlow[61][60]<<endl;
 		// Write here the process you want to do every 'plot' times
 		if ((ct + 1) % plot == 0)
 		{
