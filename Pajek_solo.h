@@ -9,11 +9,12 @@
 #define THRESHOLD_1 0.5
 #define THRESHOLD_2 1.0
 
-void NodeConfigure(const char *NET_file, int node, int SOURCE, vector<int> &DIST, vector<double> &x_coordinate, vector<double> &y_coordinate, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength, vector<vector<double>> &node_distance)
+void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<double> &x_coordinate, vector<double> &y_coordinate, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength, vector<vector<double>> &node_distance)
 {
     int i, j = 0;
     FILE *fpN;
     bool fig_DIST=false;
+    bool fig_SOURCE=false;
 
 
     if ((fpN = fopen(NET_file, "w")) == NULL)
@@ -33,7 +34,12 @@ void NodeConfigure(const char *NET_file, int node, int SOURCE, vector<int> &DIST
                 fig_DIST=true;
             }
         }
-        if (i == SOURCE || fig_DIST)
+        for(int j=0;j<SOURCE.size();j++){
+            if(i==SOURCE[j]){
+                fig_SOURCE=true;
+            }
+        }        
+        if (fig_SOURCE || fig_DIST)
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic Black\n",
                     i + 1, i + 1, line, row );
@@ -44,6 +50,7 @@ void NodeConfigure(const char *NET_file, int node, int SOURCE, vector<int> &DIST
                     i + 1, i + 1, line, row );
         }
         fig_DIST=false;
+        fig_SOURCE=false;
     }
 
 
@@ -103,7 +110,7 @@ void NodeConfigure(const char *NET_file, int node, int SOURCE, vector<int> &DIST
     fclose(fpN);
 }
 
-void SetTopologyColor(int node, int SOURCE, vector<int> &DIST, vector<double> x_coordinate, vector<double> y_coordinate, vector<vector<double>> Q_tubeFlow, vector<vector<double>> L_tubeLength, double eps, double Q_allFlow, int ct, vector<vector<double>> node_distance)
+void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<double> x_coordinate, vector<double> y_coordinate, vector<vector<double>> Q_tubeFlow, vector<vector<double>> L_tubeLength, double eps, double Q_allFlow, int ct, vector<vector<double>> node_distance)
 {
 
     int i, j = 0;
@@ -113,6 +120,7 @@ void SetTopologyColor(int node, int SOURCE, vector<int> &DIST, vector<double> x_
     unsigned int green_path_count = 0;
     FILE *fpN;
     bool fig_DIST = false;
+    bool fig_SOURCE = false;
 
     char filename[FILENAMESIZE];
 
@@ -133,7 +141,12 @@ void SetTopologyColor(int node, int SOURCE, vector<int> &DIST, vector<double> x_
                 fig_DIST=true;
             }
         }
-        if (i == SOURCE || fig_DIST )
+        for(int j=0;j<SOURCE.size();j++){
+            if(i==SOURCE[j]){
+                fig_SOURCE=true;
+            }
+        }        
+        if (fig_SOURCE || fig_DIST )
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic Black\n",
                     i + 1, i + 1, line, row );
@@ -144,6 +157,7 @@ void SetTopologyColor(int node, int SOURCE, vector<int> &DIST, vector<double> x_
                     i + 1, i + 1, line, row );
         }
         fig_DIST=false;
+        fig_SOURCE=false;
     }
     fprintf(fpN, "*Arcs\n");
     fprintf(fpN, "*Edges\n");

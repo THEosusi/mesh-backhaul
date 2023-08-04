@@ -51,6 +51,11 @@ vector<double> orange;
 vector<double> green;
 vector<double> blue;
 
+//SOURCE and DIST
+vector<double> Flow_SOURCE;
+vector<int> SOURCE;
+vector<int> DIST;
+
 // Prototype declaration
 void Initialize(int,int);
 void VectorFree(int);
@@ -69,9 +74,14 @@ int main(int argc, char *argv[])
 	static int i, j, k = 0;
 	static int a, b = 0;
 
+	// Non-vector parameters initialization
+	static double Q_allFlow = 0.0;
+	static double degeneracyEffect = 1.0;
+
 	// Node
-	static int SOURCE = 44;
-	vector<int> DIST = {18,37,60};
+	vector<double> Flow_SOURCE = {};
+	vector<int> SOURCE = {};
+	vector<int> DIST = {18,37};
 	static int node = atoi(argv[1]);
 	static int node_except = node - DIST.size();
 
@@ -86,10 +96,6 @@ int main(int argc, char *argv[])
 	static int test_iter = 10;
 	static double eps = 1.0e-10; // Convergence detection
 
-	// Non-vector parameters initialization
-	static double Q_allFlow = 1.0;
-	static double degeneracyEffect = 1.0;
-
 	// The file name is the simulation topology entered at compile.
 	const char *NET_file = argv[2];
 
@@ -100,8 +106,21 @@ int main(int argc, char *argv[])
 	NodeConfigure(NET_file, node, SOURCE, DIST, x_coordinate, y_coordinate, D_tubeThickness, L_tubeLength, node_distance);
 
 	// Setting for Q_allFlow and num_loop
-	printf("Please set  The value to be distributed by PS: ");
-	scanf("%lf", &Q_allFlow);
+	int numbers_source;
+	printf("Please set  The number of sources ");
+	scanf("%d", &numbers_source);
+
+	int sources;
+	double flow_source;
+	for(int i=0;i<numbers_source;i++){
+		printf("Please set  The position of sources ");
+		scanf("%d", &sources);
+		SOURCE.push_back(sources);
+		printf("Please set  The flow of sources ");
+		scanf("%lf", &flow_source);
+		Flow_SOURCE.push_back(flow_source);
+		Q_allFlow += flow_source;
+	}
 	printf("Please set  The number of iterations: ");
 	scanf("%d", &num_loop);
 
@@ -112,16 +131,20 @@ int main(int argc, char *argv[])
 
 		// Consider the case where the source and destination change during the loop.
 		// The following process* is described in the loop.
-		Q_Kirchhoff[SOURCE] = Q_allFlow;
+		for(int i=0;i<SOURCE.size();i++){
+			Q_Kirchhoff[SOURCE[i]] = Flow_SOURCE[i];
+		}
 		for(int i=0;i<DIST.size();i++){
-			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1.0 / DIST.size()); // SOUCE LEN is 1 あとでへんこう
+			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( SOURCE.size() / DIST.size()); // SOUCE LEN is 1 あとでへんこう
 		}
 		for (i = 0; i < node; i++)
 		{
 			pressureCoefficient[i][i] = 0.0;
-			for(int j=0;j<DIST.size();j++){
-				if (i == SOURCE || i == DIST[j]){
-					fig_DIST=true;
+			for(int j=0;j<SOURCE.size();j++){
+				for(int k=0;k<DIST.size();k++){
+					if (i == SOURCE[j] || i == DIST[k]){
+						fig_DIST=true;
+					}
 				}
 			}
 			if (!fig_DIST){
@@ -287,8 +310,8 @@ int main(int argc, char *argv[])
 			}
 		}
 
-		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
-		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
+		cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
 		/*for(int i=0;i<node;i++){
 			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
 		}*/
@@ -366,6 +389,11 @@ void VectorFree(int node)
 {
 
 	// 1xN matrix
+	// Source and DIST
+	vector<double>().swap(Flow_SOURCE);
+	vector<int>().swap(SOURCE);
+	vector<int>().swap(DIST);
+
 	// Basis parameter
 	vector<double>().swap(Q_Kirchhoff);
 	vector<double>().swap(P_tubePressure);
