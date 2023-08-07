@@ -3,13 +3,14 @@
 #define INF 10000.0
 #define FILENAMESIZE 256
 
-#define INIT_THICKNESS 54.0
+#define INIT_THICKNESS 54.0 //54 default
 #define INIT_LENGTH 1.0
 
 #define THRESHOLD_1 0.5
 #define THRESHOLD_2 1.0
+#define POW 1.0
 
-void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<double> &x_coordinate, vector<double> &y_coordinate, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength, vector<vector<double>> &node_distance)
+void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength)
 {
     int i, j = 0;
     FILE *fpN;
@@ -80,8 +81,8 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
                         PoptoDistj=tem_PoptoDistj;
                     }
                 }
-                L_tubeLength[i][j] =  pow(PoptoDistj,1);
-                L_tubeLength[j][i] =  pow(PoptoDisti,1);
+                L_tubeLength[i][j] =  pow(PoptoDistj,POW);
+                L_tubeLength[j][i] =  pow(PoptoDisti,POW);
 
 
             }else if(j-i == 8 && (i<56 || j<56)){
@@ -99,8 +100,8 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
                     }
                 }
                 D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
-                L_tubeLength[i][j] =  pow(PoptoDistj,1);
-                L_tubeLength[j][i] =  pow(PoptoDistj,1);
+                L_tubeLength[i][j] =  pow(PoptoDistj,POW);
+                L_tubeLength[j][i] =  pow(PoptoDisti,POW);
             }else{
                 L_tubeLength[i][j] = L_tubeLength[j][i] = INF;
             }
@@ -110,7 +111,7 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
     fclose(fpN);
 }
 
-void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<double> x_coordinate, vector<double> y_coordinate, vector<vector<double>> Q_tubeFlow, vector<vector<double>> L_tubeLength, double eps, double Q_allFlow, int ct, vector<vector<double>> node_distance)
+void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<vector<double>> Q_tubeFlow, vector<vector<double>> L_tubeLength, double eps, double Q_allFlow, int ct)
 {
 
     int i, j = 0;

@@ -20,7 +20,7 @@
 
 #define INF 10000.0		// Infinite length representation. Exclude L from the calculation, where L==INF
 #define NEG -1.0		// For representation of negative
-#define gamma 1.5		// Slope of the sigmoid function
+#define gamma 1.5		// Slope of the sigmoid function 1.5
 #define delta_time 0.01 //Δt scale
 #define plot 1			// Number of loops you want to plot
 
@@ -43,9 +43,6 @@ vector<vector<double>> pressureCoefficient_sinkExcept; // without sink node
 vector<vector<double>> Q_tubeFlow_sigmoidOutput; // The buffer for storing sigmoid func. solutions
 
 // Pajek
-vector<double> x_coordinate;
-vector<double> y_coordinate;
-vector<vector<double>> node_distance;
 vector<double> red;
 vector<double> orange;
 vector<double> green;
@@ -103,7 +100,7 @@ int main(int argc, char *argv[])
 	Initialize(node, node_except);
 
 	// Create simulation topology for Pajek
-	NodeConfigure(NET_file, node, SOURCE, DIST, x_coordinate, y_coordinate, D_tubeThickness, L_tubeLength, node_distance);
+	NodeConfigure(NET_file, node, SOURCE, DIST, D_tubeThickness, L_tubeLength);
 
 	// Setting for Q_allFlow and num_loop
 	int numbers_source;
@@ -126,7 +123,16 @@ int main(int argc, char *argv[])
 
 	// PhysarumSolver Iteration Start
 	while (ct != num_loop)
-	{
+	{	
+		// change situation
+		if(ct==1500){
+			SOURCE = {30,35};
+			Flow_SOURCE={100,100};
+			Q_allFlow = 0.0;
+			for(int i=0;i<SOURCE.size();i++){
+			Q_allFlow += flow_source;
+			}
+		}
 		// auto start = chrono::system_clock::now();
 
 		// Consider the case where the source and destination change during the loop.
@@ -137,6 +143,7 @@ int main(int argc, char *argv[])
 		for(int i=0;i<DIST.size();i++){
 			Q_Kirchhoff[DIST[i]] = Q_allFlow * NEG * ( 1.0 / DIST.size()); 
 		}
+
 		for (i = 0; i < node; i++)
 		{
 			pressureCoefficient[i][i] = 0.0;
@@ -257,6 +264,8 @@ int main(int argc, char *argv[])
 			}
 			fig_DIST=false;
 		}
+
+
 		// Derive pressure gradient for each tube by simultaneous equations
 		// End
 
@@ -309,17 +318,27 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
-
+		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
 		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
 		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		//cout<<Q_tubeFlow[30][38]<<"cc"<<Q_tubeFlow[30][29]<<"cc"<<Q_tubeFlow[30][22]<<"cc"<<Q_tubeFlow[30][31]<<endl;
+		//cout<<Q_tubeFlow[44][52]<<"dd"<<Q_tubeFlow[44][43]<<"dd"<<Q_tubeFlow[44][36]<<"dd"<<Q_tubeFlow[44][45]<<endl;
+		//cout<<Q_tubeFlow[36][44]<<"ee"<<Q_tubeFlow[36][35]<<"dd"<<Q_tubeFlow[36][28]<<"dd"<<Q_tubeFlow[36][37]<<endl;
+		/*for(int i=25;i<43;i++){
+			for(int j=0;j<node;j++)
+			cout<<i<<"ww"<<j<<"ww"<<L_tubeLength[i][j]<<endl;
+		}*/
 		/*for(int i=0;i<node;i++){
 			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
 		}*/
-		//cout<<Q_tubeFlow[52][60]<<"aaa"<<Q_tubeFlow[59][60]<<"aaa"<<Q_tubeFlow[61][60]<<endl;
+		/*for(int i=0;i<node_except;i++){
+			cout<<i<<"aa"<<Q_Kirchhoff_sinkExcept[i]<<endl;
+		}*/
+		//cout<<Q_tubeFlow[27][19]<<"cc"<<Q_tubeFlow[18][19]<<"cc"<<Q_tubeFlow[11][19]<<"cc"<<Q_tubeFlow[20][19]<<endl;
 		// Write here the process you want to do every 'plot' times
 		if ((ct + 1) % plot == 0)
 		{
-			SetTopologyColor(node, SOURCE, DIST, x_coordinate, y_coordinate, Q_tubeFlow, L_tubeLength, eps, Q_allFlow, ct, node_distance);
+			SetTopologyColor(node, SOURCE, DIST, Q_tubeFlow, L_tubeLength, eps, Q_allFlow, ct);
 		}
 
 		ct++;
@@ -344,9 +363,6 @@ void Initialize(int node, int node_except)
 	P_tubePressure_sinkExcept.resize(node_except);
 
 	// Pajek
-	// vector<double> x_coordinate(node);
-	x_coordinate.resize(node);
-	y_coordinate.resize(node);
 
 	// 2xN matrix
 	// Basis parameter
@@ -362,7 +378,6 @@ void Initialize(int node, int node_except)
 	// Sigmoid function
 	Q_tubeFlow_sigmoidOutput.resize(node);
 
-	node_distance.resize(node);
 
 	for (int i = 0; i < node; i++)
 	{
@@ -375,7 +390,6 @@ void Initialize(int node, int node_except)
 
 		Q_tubeFlow_sigmoidOutput[i].resize(node);
 
-		node_distance[i].resize(node);
 	}
 
 	for (int i = 0; i < node_except; i++)
@@ -403,8 +417,6 @@ void VectorFree(int node)
 	vector<double>().swap(P_tubePressure_sinkExcept);
 
 	// Pajek
-	vector<double>().swap(x_coordinate);
-	vector<double>().swap(y_coordinate);
 
 	// 2xN matrix
 	// Basis parameter
@@ -419,6 +431,4 @@ void VectorFree(int node)
 
 	// Sigmoid function
 	vector<vector<double>>().swap(Q_tubeFlow_sigmoidOutput);
-
-	vector<vector<double>>().swap(node_distance);
 }
