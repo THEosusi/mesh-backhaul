@@ -21,8 +21,9 @@
 #define INF 10000.0		// Infinite length representation. Exclude L from the calculation, where L==INF
 #define NEG -1.0		// For representation of negative
 #define gamma 1.5		// Slope of the sigmoid function 1.5
-#define delta_time 0.01 //Δt scale
+#define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
+#define MAX_FLOW 54.0
 
 
 // Basis parameter
@@ -125,14 +126,14 @@ int main(int argc, char *argv[])
 	while (ct != num_loop)
 	{	
 		// change situation
-		if(ct==1500){
+		/*if(ct==1500){
 			SOURCE = {30,35};
 			Flow_SOURCE={100,100};
 			Q_allFlow = 0.0;
 			for(int i=0;i<SOURCE.size();i++){
 			Q_allFlow += flow_source;
 			}
-		}
+		}*/
 		// auto start = chrono::system_clock::now();
 
 		// Consider the case where the source and destination change during the loop.
@@ -302,7 +303,8 @@ int main(int argc, char *argv[])
 				if (L_tubeLength[i][j] != INF)
 				{
 
-					D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;
+					D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//original
+					//D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - ( (fabs(Q_tubeFlow[i][j]) / MAX_FLOW) *D_tubeThickness[i][j])) * delta_time; //
 				}
 			}
 		}
@@ -318,6 +320,8 @@ int main(int argc, char *argv[])
 				}
 			}
 		}
+		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;
+		//cout<<D_tubeThickness[38][37]<<endl;
 		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
 		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
 		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;

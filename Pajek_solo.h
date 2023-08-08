@@ -70,38 +70,49 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
                 fprintf(fpN, "%d %d 1\n", i + 1, j + 1);
                 D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
                 double PoptoDisti =  abs(((int)DIST[0])/8- i/8) + abs(((int)DIST[0]%8) - i%8) + 1;// due to prevent 0
-                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;                
+                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;
+                double PoptoDistij = (PoptoDisti + PoptoDistj)/2; // case 2 idea            
                 for(int k=0;k<DIST.size();k++){
                     double tem_PoptoDisti =  abs(((int)DIST[k])/8- i/8) + abs(((int)DIST[k]%8) - i%8) + 1;
                     double tem_PoptoDistj =  abs(((int)DIST[k])/8- j/8) + abs(((int)DIST[k]%8) - j%8) + 1;
-                    if(tem_PoptoDisti<PoptoDisti){
+                    double tem_PoptoDistij = (tem_PoptoDisti + tem_PoptoDistj)/2; //case 2
+                    if (tem_PoptoDistij<PoptoDistij){
+                        PoptoDistij=tem_PoptoDistij;
+                    }
+                    /*if(tem_PoptoDisti<PoptoDisti){
                         PoptoDisti=tem_PoptoDisti;
                     }
                     if(tem_PoptoDistj<PoptoDistj){
                         PoptoDistj=tem_PoptoDistj;
-                    }
+                    }*/
                 }
-                L_tubeLength[i][j] =  pow(PoptoDistj,POW);
-                L_tubeLength[j][i] =  pow(PoptoDisti,POW);
-
+                //L_tubeLength[i][j] =  pow(PoptoDistj,POW);
+                //L_tubeLength[j][i] =  pow(PoptoDisti,POW);
+                L_tubeLength[j][i] = L_tubeLength[i][j] = pow(PoptoDistij,POW);
 
             }else if(j-i == 8 && (i<56 || j<56)){
                 fprintf(fpN, "%d %d 1\n", i + 1, j + 1);
+                D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
                 double PoptoDisti =  abs(((int)DIST[0])/8- i/8) + abs(((int)DIST[0]%8) - i%8) + 1;// due to prevent 0
-                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;                
+                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;
+                double PoptoDistij = (PoptoDisti + PoptoDistj)/2; // case 2 idea               
                 for(int k=0;k<DIST.size();k++){
                     double tem_PoptoDisti =  abs(((int)DIST[k])/8- i/8) + abs(((int)DIST[k]%8) - i%8) + 1;
                     double tem_PoptoDistj =  abs(((int)DIST[k])/8- j/8) + abs(((int)DIST[k]%8) - j%8) + 1;
-                    if(tem_PoptoDisti<PoptoDisti){
+                    double tem_PoptoDistij = (tem_PoptoDisti + tem_PoptoDistj)/2; //case 2
+                    if (tem_PoptoDistij<PoptoDistij){
+                        PoptoDistij=tem_PoptoDistij;
+                    }
+                    /*if(tem_PoptoDisti<PoptoDisti){
                         PoptoDisti=tem_PoptoDisti;
                     }
                     if(tem_PoptoDistj<PoptoDistj){
                         PoptoDistj=tem_PoptoDistj;
-                    }
+                    }*/
                 }
-                D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
-                L_tubeLength[i][j] =  pow(PoptoDistj,POW);
-                L_tubeLength[j][i] =  pow(PoptoDisti,POW);
+                //L_tubeLength[i][j] =  pow(PoptoDistj,POW);
+                //L_tubeLength[j][i] =  pow(PoptoDisti,POW);
+                L_tubeLength[j][i] = L_tubeLength[i][j] = pow(PoptoDistij,POW);
             }else{
                 L_tubeLength[i][j] = L_tubeLength[j][i] = INF;
             }
