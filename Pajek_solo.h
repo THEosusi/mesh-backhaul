@@ -3,7 +3,7 @@
 #define INF 10000.0
 #define FILENAMESIZE 256
 
-#define INIT_THICKNESS 54.0 //54 default
+#define INIT_THICKNESS 0.5 //54 default
 #define INIT_LENGTH 1.0
 
 #define THRESHOLD_1 0.5

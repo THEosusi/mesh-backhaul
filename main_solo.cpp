@@ -301,10 +301,8 @@ int main(int argc, char *argv[])
 			for (j = 0; j < node; j++)
 			{
 				if (L_tubeLength[i][j] != INF)
-				{
-
-					D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//original
-					//D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - ( (fabs(Q_tubeFlow[i][j]) / MAX_FLOW) *D_tubeThickness[i][j])) * delta_time; //
+				{	
+					D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//original	
 				}
 			}
 		}
@@ -316,15 +314,22 @@ int main(int argc, char *argv[])
 			{
 				if (L_tubeLength[i][j] != INF)
 				{
-					D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
+					if(fabs(Q_tubeFlow[i][j])<=MAX_FLOW){
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
+					}else{
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] - D_tubeThickness_deltaT[i][j];
+					}
+
 				}
 			}
 		}
 		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;
 		//cout<<D_tubeThickness[38][37]<<endl;
 		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
-		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
-		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
+		cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
+		cout<<Q_tubeFlow[53][61]<<"cc"<<Q_tubeFlow[53][52]<<"cc"<<Q_tubeFlow[53][45]<<"cc"<<Q_tubeFlow[53][54]<<endl;
+		cout<<D_tubeThickness[53][61]<<"dd"<<D_tubeThickness[53][52]<<"dd"<<D_tubeThickness[53][45]<<"dd"<<D_tubeThickness[53][54]<<endl;
 		//cout<<Q_tubeFlow[30][38]<<"cc"<<Q_tubeFlow[30][29]<<"cc"<<Q_tubeFlow[30][22]<<"cc"<<Q_tubeFlow[30][31]<<endl;
 		//cout<<Q_tubeFlow[44][52]<<"dd"<<Q_tubeFlow[44][43]<<"dd"<<Q_tubeFlow[44][36]<<"dd"<<Q_tubeFlow[44][45]<<endl;
 		//cout<<Q_tubeFlow[36][44]<<"ee"<<Q_tubeFlow[36][35]<<"dd"<<Q_tubeFlow[36][28]<<"dd"<<Q_tubeFlow[36][37]<<endl;
