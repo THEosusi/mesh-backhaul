@@ -330,9 +330,7 @@ int main(int argc, char *argv[])
 					}
 					if(attenuation_flag[i][j] != 0){
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] - (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])/E_Slope) * cos( M_PI * attenuation_curve[i][j]);//expの割り算はいじっていい，
-						if(i==45&&j==37){
-						cout<< (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])) * cos( M_PI * attenuation_curve[i][j])<<endl;
-						}
+
 					}else{
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
 					}
