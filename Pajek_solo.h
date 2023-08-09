@@ -6,9 +6,14 @@
 #define INIT_THICKNESS 0.5 //54 default
 #define INIT_LENGTH 1.0
 
-#define THRESHOLD_1 0.5
-#define THRESHOLD_2 1.0
+#define THRESHOLD_1 0.1
+#define THRESHOLD_2 0.3
+#define THRESHOLD_3 0.5
+#define THRESHOLD_4 0.7
+#define THRESHOLD_5 0.9
+
 #define POW 1.0
+#define MAX_FLOW 54.0 //depending on the connection
 
 void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength)
 {
@@ -127,9 +132,12 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
 
     int i, j = 0;
     unsigned int all_path_count = 0;
-    unsigned int red_path_count = 0;
     unsigned int blue_path_count = 0;
-    unsigned int green_path_count = 0;
+    unsigned int cyan_path_count = 0;
+    unsigned int yellow_path_count = 0;
+    unsigned int orange_path_count = 0;
+    unsigned int red_path_count = 0;
+    unsigned int redviolet_path_count = 0;
     FILE *fpN;
     bool fig_DIST = false;
     bool fig_SOURCE = false;
@@ -179,29 +187,47 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
         for (j = 0; j < node; j++)
         {
             if (L_tubeLength[i][j] != INF)
-            {
+            {       
                     if (0 < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <= eps)
                     {   
                         all_path_count++;
                     }
-                    else if (eps < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <= THRESHOLD_1)
+                    else if ( Q_tubeFlow[i][j] <= THRESHOLD_1 * MAX_FLOW)
                     {
                         fprintf(fpN, "%d %d 1 c Blue\n", i + 1, j + 1);
                         blue_path_count++;
                         all_path_count++;
                     }
-                    else if (THRESHOLD_1 < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <= THRESHOLD_2)
+                    else if ( Q_tubeFlow[i][j] <= THRESHOLD_2 * MAX_FLOW)
                     {
-                        fprintf(fpN, "%d %d 2 c Green\n", i + 1, j + 1);
-                        green_path_count++;
+                        fprintf(fpN, "%d %d 2 c Cyan\n", i + 1, j + 1);
+                        cyan_path_count++;
                         all_path_count++;
                     }
-                    else if (THRESHOLD_2 < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <= Q_allFlow)
+                    else if ( Q_tubeFlow[i][j] <= THRESHOLD_3 * MAX_FLOW)
+                    {
+                        fprintf(fpN, "%d %d 3 c Yellow\n", i + 1, j + 1);
+                        yellow_path_count++;
+                        all_path_count++;
+                    }
+                    else if ( Q_tubeFlow[i][j] <= THRESHOLD_4 * MAX_FLOW)
+                    {
+                        fprintf(fpN, "%d %d 3 c Orange\n", i + 1, j + 1);
+                        orange_path_count++;
+                        all_path_count++;
+                    }
+                    else if ( Q_tubeFlow[i][j] <= THRESHOLD_5 * MAX_FLOW)
                     {
                         fprintf(fpN, "%d %d 3 c Red\n", i + 1, j + 1);
                         red_path_count++;
                         all_path_count++;
                     }
+                    else if ( THRESHOLD_5 * MAX_FLOW < Q_tubeFlow[i][j])
+                    {
+                        fprintf(fpN, "%d %d 3 c RedViolet\n", i + 1, j + 1);
+                        redviolet_path_count++;
+                        all_path_count++;
+                    }                     
             }
         }
     }

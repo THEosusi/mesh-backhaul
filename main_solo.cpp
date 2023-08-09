@@ -17,6 +17,7 @@
 #include "MT.h"
 #include "ICCG.h"
 #include "Pajek_solo.h"
+#include <cmath>
 
 #define INF 10000.0		// Infinite length representation. Exclude L from the calculation, where L==INF
 #define NEG -1.0		// For representation of negative
@@ -24,6 +25,7 @@
 #define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
 #define MAX_FLOW 54.0
+#define E_Slope 100 // // Slope of E in attenuation curve
 
 
 // Basis parameter
@@ -32,6 +34,9 @@ vector<double> P_tubePressure;			// p_i(t) - p_j(t)
 vector<vector<double>> Q_tubeFlow;		// Q_ij(t)
 vector<vector<double>> D_tubeThickness; // D_ij(t)
 vector<vector<double>> L_tubeLength;	// L_ij(t)
+vector<vector<int>> attenuation_flag;
+vector<vector<double>> attenuation_curve;
+
 
 // To calculate parameter
 vector<double> Q_Kirchhoff_sinkExcept;				   // ΣQ without sink node
@@ -312,25 +317,46 @@ int main(int argc, char *argv[])
 		{
 			for (j = 0; j < node; j++)
 			{
-				if (L_tubeLength[i][j] != INF)
-				{
-					if(fabs(Q_tubeFlow[i][j])<=MAX_FLOW){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
-					}else{
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] - D_tubeThickness_deltaT[i][j];
-					}
+				if (L_tubeLength[i][j] != INF){
+					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
+						attenuation_flag[i][j] = 1;
 
+					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j]==1){
+						attenuation_flag[i][j] *= -1;
+						attenuation_curve[i][j] += 1;
+					}else if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j]== -1){
+						attenuation_flag[i][j] *= -1;
+						attenuation_curve[i][j] += 1;				
+					}
+					if(attenuation_flag[i][j] != 0){
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] - (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])/E_Slope) * cos( M_PI * attenuation_curve[i][j]);//expの割り算はいじっていい，
+						if(i==45&&j==37){
+						cout<< (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])) * cos( M_PI * attenuation_curve[i][j])<<endl;
+						}
+					}else{
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
+					}
 				}
+					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW){
+						attenuation_curve[i][j]= true;
+					}
+					if(attenuation_curve[i][j] == true){//臨界曲線つかったらおもろいんじゃね//曲線じゃない収束させる漸化式をつくる//xは何回プラスマイナスが入れ替わったらをカウントしそれつかう
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + exp(D_tubeThickness_deltaT[i][j])*sin(D_tubeThickness_deltaT[i][j]);
+					}else{
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
+					}*/					
 			}
 		}
 		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;
 		//cout<<D_tubeThickness[38][37]<<endl;
 		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
+		//cout<<Q_tubeFlow[45][53]<<"aa"<<Q_tubeFlow[45][44]<<"aa"<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[45][46]<<endl;
 		cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
 		cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
 		cout<<Q_tubeFlow[53][61]<<"cc"<<Q_tubeFlow[53][52]<<"cc"<<Q_tubeFlow[53][45]<<"cc"<<Q_tubeFlow[53][54]<<endl;
-		cout<<D_tubeThickness[53][61]<<"dd"<<D_tubeThickness[53][52]<<"dd"<<D_tubeThickness[53][45]<<"dd"<<D_tubeThickness[53][54]<<endl;
-		//cout<<Q_tubeFlow[30][38]<<"cc"<<Q_tubeFlow[30][29]<<"cc"<<Q_tubeFlow[30][22]<<"cc"<<Q_tubeFlow[30][31]<<endl;
+		//cout<<D_tubeThickness[53][61]<<"dd"<<D_tubeThickness[53][52]<<"dd"<<D_tubeThickness[53][45]<<"dd"<<D_tubeThickness[53][54]<<endl;
+		//cout<<Q_tubeFlow[45][53]<<"ww"<<Q_tubeFlow[45][44]<<"ww"<<Q_tubeFlow[45][37]<<"ww"<<Q_tubeFlow[45][46]<<endl;
+		//cout<<Q_tubeFlow[46][54]<<"oo"<<Q_tubeFlow[46][45]<<"oo"<<Q_tubeFlow[46][38]<<"oo"<<Q_tubeFlow[46][47]<<endl;
 		//cout<<Q_tubeFlow[44][52]<<"dd"<<Q_tubeFlow[44][43]<<"dd"<<Q_tubeFlow[44][36]<<"dd"<<Q_tubeFlow[44][45]<<endl;
 		//cout<<Q_tubeFlow[36][44]<<"ee"<<Q_tubeFlow[36][35]<<"dd"<<Q_tubeFlow[36][28]<<"dd"<<Q_tubeFlow[36][37]<<endl;
 		/*for(int i=25;i<43;i++){
@@ -378,7 +404,8 @@ void Initialize(int node, int node_except)
 	Q_tubeFlow.resize(node);
 	D_tubeThickness.resize(node);
 	L_tubeLength.resize(node);
-
+	attenuation_curve.resize(node);
+	attenuation_flag.resize(node);
 	// To calculate parameter
 	D_tubeThickness_deltaT.resize(node);
 	pressureCoefficient.resize(node);
@@ -398,7 +425,8 @@ void Initialize(int node, int node_except)
 		pressureCoefficient[i].resize(node);
 
 		Q_tubeFlow_sigmoidOutput[i].resize(node);
-
+		attenuation_curve[i].resize(node);
+		attenuation_flag[i].resize(node);
 	}
 
 	for (int i = 0; i < node_except; i++)
@@ -432,6 +460,8 @@ void VectorFree(int node)
 	vector<vector<double>>().swap(Q_tubeFlow);
 	vector<vector<double>>().swap(D_tubeThickness);
 	vector<vector<double>>().swap(L_tubeLength);
+	vector<vector<int>>().swap(attenuation_flag);
+	vector<vector<double>>().swap(attenuation_curve);
 
 	// To calculate parameter
 	vector<vector<double>>().swap(D_tubeThickness_deltaT);
