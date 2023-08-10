@@ -317,8 +317,18 @@ int main(int argc, char *argv[])
 		{
 			for (j = 0; j < node; j++)
 			{
-				if (L_tubeLength[i][j] != INF){
+				if (L_tubeLength[i][j] != INF){	
 					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
+						attenuation_flag[i][j] = 1;
+					}
+					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 1){
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * double(ct) /E_Slope) * cos( NEG * M_PI );
+					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j] == 1){
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) * exp(NEG * double(ct) /E_Slope) * cos(  M_PI );
+					}else{
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]);
+					}
+					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
 						attenuation_flag[i][j] = 1;
 
 					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j]==1){
@@ -330,19 +340,15 @@ int main(int argc, char *argv[])
 					}
 					if(attenuation_flag[i][j] != 0){
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] - (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])/E_Slope) * cos( M_PI * attenuation_curve[i][j]);//expの割り算はいじっていい，
+						if(i==36&&j==37){
+							cout<<"aa"<<attenuation_curve[i][j]<<endl;
+							cout<<"bb"<<ct<<endl;
+						}
 
 					}else{
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
-					}
-				}
-					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW){
-						attenuation_curve[i][j]= true;
-					}
-					if(attenuation_curve[i][j] == true){//臨界曲線つかったらおもろいんじゃね//曲線じゃない収束させる漸化式をつくる//xは何回プラスマイナスが入れ替わったらをカウントしそれつかう
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + exp(D_tubeThickness_deltaT[i][j])*sin(D_tubeThickness_deltaT[i][j]);
-					}else{
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
-					}*/					
+					}*/
+				}			
 			}
 		}
 		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;

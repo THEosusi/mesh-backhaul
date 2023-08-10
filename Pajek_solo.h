@@ -5,7 +5,7 @@
 
 #define INIT_THICKNESS 0.5 //54 default
 #define INIT_LENGTH 1.0
-
+#define THRESHOLD_0 0.01
 #define THRESHOLD_1 0.1
 #define THRESHOLD_2 0.3
 #define THRESHOLD_3 0.5
@@ -188,7 +188,7 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
         {
             if (L_tubeLength[i][j] != INF)
             {       
-                    if (0 < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <= eps)
+                    if (0 < Q_tubeFlow[i][j] && Q_tubeFlow[i][j] <=THRESHOLD_0 )//閾値変更可能
                     {   
                         all_path_count++;
                     }
