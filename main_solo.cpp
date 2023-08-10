@@ -317,17 +317,35 @@ int main(int argc, char *argv[])
 		{
 			for (j = 0; j < node; j++)
 			{
-				if (L_tubeLength[i][j] != INF){	
-					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
+				{	if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
+						attenuation_flag[i][j] = 1;
+
+					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j]==1){
+						attenuation_flag[i][j] *= -1;
+						attenuation_curve[i][j] += 1;
+					}else if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j]== -1){
+						attenuation_flag[i][j] *= -1;
+						attenuation_curve[i][j] += 1;				
+					}
+					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW){
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j]) / E_Slope) * cos( M_PI );
+						/*if(i==36&&j==37){
+							cout<<"aa"<<attenuation_curve[i][j]<<endl;
+							cout<<"bb"<<cos( NEG * M_PI )<<endl;
+						}*/
+					}else{
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j]) / E_Slope) * cos( 0 );
+					}
+					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
 						attenuation_flag[i][j] = 1;
 					}
 					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 1){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * double(ct) /E_Slope) * cos( NEG * M_PI );
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * double(ct) /E_Slope) * cos( M_PI );
 					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j] == 1){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) * exp(NEG * double(ct) /E_Slope) * cos(  M_PI );
+						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) * exp(NEG * double(ct) /E_Slope) * cos(  0 );
 					}else{
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]);
-					}
+					}*/
 					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
 						attenuation_flag[i][j] = 1;
 
