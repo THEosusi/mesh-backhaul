@@ -26,6 +26,7 @@
 #define plot 1			// Number of loops you want to plot
 #define MAX_FLOW 54.0
 #define E_Slope 100 // // Slope of E in attenuation curve
+#define coefficient_tanh 10 //  coefficient of tanh
 
 
 // Basis parameter
@@ -317,7 +318,9 @@ int main(int argc, char *argv[])
 		{
 			for (j = 0; j < node; j++)
 			{
-				{	if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
+				{	
+					D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  tanh((MAX_FLOW - fabs(Q_tubeFlow[i][j]))/coefficient_tanh);
+					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
 						attenuation_flag[i][j] = 1;
 
 					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j]==1){
@@ -329,42 +332,9 @@ int main(int argc, char *argv[])
 					}
 					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW){
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j]) / E_Slope) * cos( M_PI );
-						/*if(i==36&&j==37){
-							cout<<"aa"<<attenuation_curve[i][j]<<endl;
-							cout<<"bb"<<cos( NEG * M_PI )<<endl;
-						}*/
+
 					}else{
 						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j]) / E_Slope) * cos( 0 );
-					}
-					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
-						attenuation_flag[i][j] = 1;
-					}
-					if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 1){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  exp(NEG * double(ct) /E_Slope) * cos( M_PI );
-					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j] == 1){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) * exp(NEG * double(ct) /E_Slope) * cos(  0 );
-					}else{
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]);
-					}*/
-					/*if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j] == 0){
-						attenuation_flag[i][j] = 1;
-
-					}else if(fabs(Q_tubeFlow[i][j]) < MAX_FLOW && attenuation_flag[i][j]==1){
-						attenuation_flag[i][j] *= -1;
-						attenuation_curve[i][j] += 1;
-					}else if(fabs(Q_tubeFlow[i][j]) >= MAX_FLOW && attenuation_flag[i][j]== -1){
-						attenuation_flag[i][j] *= -1;
-						attenuation_curve[i][j] += 1;				
-					}
-					if(attenuation_flag[i][j] != 0){
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] - (D_tubeThickness_deltaT[i][j]) *  exp(NEG * (attenuation_curve[i][j])/E_Slope) * cos( M_PI * attenuation_curve[i][j]);//expの割り算はいじっていい，
-						if(i==36&&j==37){
-							cout<<"aa"<<attenuation_curve[i][j]<<endl;
-							cout<<"bb"<<ct<<endl;
-						}
-
-					}else{
-						D_tubeThickness[i][j] = D_tubeThickness[i][j] + D_tubeThickness_deltaT[i][j];
 					}*/
 				}			
 			}
