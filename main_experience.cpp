@@ -16,7 +16,7 @@
 #include "pch.h"
 #include "MT.h"
 #include "ICCG.h"
-#include "Pajek_experience.h"
+#include "Pajeck_experience.h"
 #include <cmath>
 
 #define INF 10000.0		// Infinite length representation. Exclude L from the calculation, where L==INF
@@ -24,11 +24,11 @@
 #define gamma 1.5		// Slope of the sigmoid function 1.5
 #define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
-#define MAX_FLOW 54.0
+#define MAX_FLOW 10.0
 #define coefficient_tanh 10 //  coefficient of tanh
 
 #define SIG 1 // change of method 0:|Q|, 1:sig
-#define NUM 0 // change of method 0:normal, 1:new
+#define NUM 1 // change of method 0:normal, 1:new
 
 
 // Basis parameter
@@ -128,9 +128,23 @@ int main(int argc, char *argv[])
 	// Create simulation topology for Pajek
 	NodeConfigure(NET_file, node, SOURCE, DIST, D_tubeThickness, L_tubeLength);
 
+    /*for(int i = 0;i<6;i++){
+        for(int j=0;j<6;j++){
+            cout<<D_tubeThickness[i][j]<<",";
+        }
+        cout<<endl;
+    }
+    for(int i = 0;i<6;i++){
+        for(int j=0;j<6;j++){
+            cout<<L_tubeLength[i][j]<<",";
+        }
+        cout<<endl;
+    }*/
+
 	// PhysarumSolver Iteration Start
 	while (ct != num_loop)
 	{	
+
 		// change situation
 		/*if(ct==1500){
 			SOURCE = {30,35};
@@ -334,7 +348,8 @@ int main(int argc, char *argv[])
 		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;
 		//cout<<D_tubeThickness[38][37]<<endl;
 		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
-		//cout<<Q_tubeFlow[0][1]<<"aa"<<Q_tubeFlow[0][2]<<"aa"<<Q_tubeFlow[3][5]<<"aa"<<Q_tubeFlow[4][5]<<endl;
+		cout<<Q_tubeFlow[0][1]<<"aa"<<Q_tubeFlow[0][2]<<"aa"<<Q_tubeFlow[1][2]<<"aa"<<Q_tubeFlow[1][3]<<"aa"<<Q_tubeFlow[1][4]<<"aa"<<Q_tubeFlow[2][4]<<endl;
+        cout<<Q_tubeFlow[3][4]<<"bb"<<Q_tubeFlow[3][5]<<"bb"<<Q_tubeFlow[4][5]<<endl;
 		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
 		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
 		//cout<<Q_tubeFlow[53][61]<<"cc"<<Q_tubeFlow[53][52]<<"cc"<<Q_tubeFlow[53][45]<<"cc"<<Q_tubeFlow[53][54]<<endl;

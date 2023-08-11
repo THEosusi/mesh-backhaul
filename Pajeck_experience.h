@@ -13,33 +13,32 @@
 #define THRESHOLD_5 0.9
 
 #define POW 1.0
-#define MAX_FLOW 54.0 //depending on the connection
-
-    bool fig_DIST=false;
-    bool fig_SOURCE=false;
-    vector<double> line = {0.05, 0.35, 0.35, 0.65, 0.65, 0.95};
-    vector<double> row = {0.5, 0.75, 0.25, 0.75, 0.25, 0.5};
-    vector<vector<double>> thickness = {
-    {0.0, 0.5, 0.5, 0.0, 0.0, 0.0},
-    {0.5, 0.0, 0.5, 0.5, 0.5, 0.0},
-    {0.5, 0.5, 0.0, 0.0, 0.5, 0.0},
-    {0.0, 0.5, 0.0, 0.0, 0.5, 0.5},
-    {0.0, 0.5, 0.5, 0.5, 0.0, 0.5},
-    {0.0, 0.0, 0.0, 0.5, 0.5, 0.0}
-    };
-    vector<vector<double>> length = {
-    {INF, 1.0, 3.0, INF, INF, INF},
-    {1.0, INF, 1.0, 2.0, 2.0, INF},
-    {3.0, 1.0, INF, INF, 3,0, INF},
-    {INF, 2.0, INF, INF, 4.0, 4.0},
-    {INF, 2.0, 3.0, 4.0, INF, 1.0},
-    {INF, INF, INF, 4.0, 1.0, INF}
-    };
+#define MAX_FLOW 10.0
 
 void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength)
 {
     int i, j = 0;
     FILE *fpN;
+    bool fig_DIST=false;
+    bool fig_SOURCE=false;
+    vector<double> line = {0.05, 0.35, 0.35, 0.65, 0.65, 0.95};
+    vector<double> row = {0.5, 0.75, 0.25, 0.75, 0.25, 0.5};
+    vector<vector<double>> thickness = {
+    {0, 0.5, 0.5, 0, 0, 0},
+    {0.5, 0, 0.5, 0.5, 0.5, 0},
+    {0.5, 0.5, 0, 0, 0.5, 0},
+    {0, 0.5, 0, 0, 0.5, 0.5},
+    {0, 0.5, 0.5, 0.5, 0, 0.5},
+    {0, 0, 0, 0.5, 0.5, 0}
+    };
+    vector<vector<double>> length = {
+    {INF, 1.0, 3.0, INF, INF, INF},
+    {1.0, INF, 1.0, 2.0, 3.0, INF},
+    {3.0, 1.0, INF, INF, 3.0, INF},
+    {INF, 2.0, INF, INF, 4.0, 4.0},
+    {INF, 3.0, 3.0, 4.0, INF, 1.0},
+    {INF, INF, INF, 4.0, 1.0, INF}
+    };
 
     if ((fpN = fopen(NET_file, "w")) == NULL)
     {
@@ -78,9 +77,20 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
 
     fprintf(fpN, "*Arcs\n");
     fprintf(fpN, "*Edges\n");
+
+    fprintf(fpN, "1 2 1\n");
+    fprintf(fpN, "1 3 1\n");
+    fprintf(fpN, "2 3 1\n");
+    fprintf(fpN, "2 4 1\n");
+    fprintf(fpN, "2 5 1\n");
+    fprintf(fpN, "3 5 1\n");
+    fprintf(fpN, "4 5 1\n");
+    fprintf(fpN, "4 6 1\n");
+    fprintf(fpN, "5 6 1\n");
+
     for (i = 0; i < node; i++)
     {
-        for (j = i; j < node; j++)
+        for (j = 0; j < node; j++)
         {   
             D_tubeThickness[i][j] = thickness[i][j];
             L_tubeLength[i][j] = length[i][j];
@@ -102,7 +112,10 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
     unsigned int redviolet_path_count = 0;
     FILE *fpN;
 
-
+    vector<double> line = {0.05, 0.35, 0.35, 0.65, 0.65, 0.95};
+    vector<double> row = {0.5, 0.75, 0.25, 0.75, 0.25, 0.5};
+    bool fig_DIST=false;
+    bool fig_SOURCE=false;
     char filename[FILENAMESIZE];
 
     sprintf(filename, "./test_topology_%d.net", ct + 1);
