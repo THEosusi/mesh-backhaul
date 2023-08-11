@@ -15,13 +15,31 @@
 #define POW 1.0
 #define MAX_FLOW 54.0 //depending on the connection
 
+    bool fig_DIST=false;
+    bool fig_SOURCE=false;
+    vector<double> line = {0.05, 0.35, 0.35, 0.65, 0.65, 0.95};
+    vector<double> row = {0.5, 0.75, 0.25, 0.75, 0.25, 0.5};
+    vector<vector<double>> thickness = {
+    {0.0, 0.5, 0.5, 0.0, 0.0, 0.0},
+    {0.5, 0.0, 0.5, 0.5, 0.5, 0.0},
+    {0.5, 0.5, 0.0, 0.0, 0.5, 0.0},
+    {0.0, 0.5, 0.0, 0.0, 0.5, 0.5},
+    {0.0, 0.5, 0.5, 0.5, 0.0, 0.5},
+    {0.0, 0.0, 0.0, 0.5, 0.5, 0.0}
+    };
+    vector<vector<double>> length = {
+    {INF, 1.0, 3.0, INF, INF, INF},
+    {1.0, INF, 1.0, 2.0, 2.0, INF},
+    {3.0, 1.0, INF, INF, 3,0, INF},
+    {INF, 2.0, INF, INF, 4.0, 4.0},
+    {INF, 2.0, 3.0, 4.0, INF, 1.0},
+    {INF, INF, INF, 4.0, 1.0, INF}
+    };
+
 void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<int> &DIST, vector<vector<double>> &D_tubeThickness, vector<vector<double>> &L_tubeLength)
 {
     int i, j = 0;
     FILE *fpN;
-    bool fig_DIST=false;
-    bool fig_SOURCE=false;
-
 
     if ((fpN = fopen(NET_file, "w")) == NULL)
     {
@@ -33,8 +51,6 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
 
     for (i = 0; i < node; i++)
     {   
-        double line=(double)(i%8)/10.0 + 0.15 ;
-        double row=(double)(i/8)/10.0 + 0.15 ;
         for(int j=0;j<DIST.size();j++){
             if(i==DIST[j]){
                 fig_DIST=true;
@@ -48,12 +64,12 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
         if (fig_SOURCE || fig_DIST)
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic Black\n",
-                    i + 1, i + 1, line, row );
+                    i + 1, i + 1, line[i], row[i] );
         }
         else
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic White\n",
-                    i + 1, i + 1, line, row );
+                    i + 1, i + 1, line[i], row[i] );
         }
         fig_DIST=false;
         fig_SOURCE=false;
@@ -66,64 +82,10 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
     {
         for (j = i; j < node; j++)
         {   
-            if (i == j)
-            {
-                D_tubeThickness[i][j] = 0;
-                L_tubeLength[i][j] = INF;
-
-            }else if(j-i == 1 && j%8 != 0){
-                fprintf(fpN, "%d %d 1\n", i + 1, j + 1);
-                D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
-                double PoptoDisti =  abs(((int)DIST[0])/8- i/8) + abs(((int)DIST[0]%8) - i%8) + 1;// due to prevent 0
-                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;
-                double PoptoDistij = (PoptoDisti + PoptoDistj)/2; // case 2 idea            
-                for(int k=0;k<DIST.size();k++){
-                    double tem_PoptoDisti =  abs(((int)DIST[k])/8- i/8) + abs(((int)DIST[k]%8) - i%8) + 1;
-                    double tem_PoptoDistj =  abs(((int)DIST[k])/8- j/8) + abs(((int)DIST[k]%8) - j%8) + 1;
-                    double tem_PoptoDistij = (tem_PoptoDisti + tem_PoptoDistj)/2; //case 2
-                    if (tem_PoptoDistij<PoptoDistij){
-                        PoptoDistij=tem_PoptoDistij;
-                    }
-                    /*if(tem_PoptoDisti<PoptoDisti){
-                        PoptoDisti=tem_PoptoDisti;
-                    }
-                    if(tem_PoptoDistj<PoptoDistj){
-                        PoptoDistj=tem_PoptoDistj;
-                    }*/
-                }
-                //L_tubeLength[i][j] =  pow(PoptoDistj,POW);
-                //L_tubeLength[j][i] =  pow(PoptoDisti,POW);
-                L_tubeLength[j][i] = L_tubeLength[i][j] = pow(PoptoDistij,POW);
-
-            }else if(j-i == 8 && (i<56 || j<56)){
-                fprintf(fpN, "%d %d 1\n", i + 1, j + 1);
-                D_tubeThickness[i][j] = D_tubeThickness[j][i] = INIT_THICKNESS;
-                double PoptoDisti =  abs(((int)DIST[0])/8- i/8) + abs(((int)DIST[0]%8) - i%8) + 1;// due to prevent 0
-                double PoptoDistj =  abs(((int)DIST[0])/8- j/8) + abs(((int)DIST[0]%8) - j%8) + 1;
-                double PoptoDistij = (PoptoDisti + PoptoDistj)/2; // case 2 idea               
-                for(int k=0;k<DIST.size();k++){
-                    double tem_PoptoDisti =  abs(((int)DIST[k])/8- i/8) + abs(((int)DIST[k]%8) - i%8) + 1;
-                    double tem_PoptoDistj =  abs(((int)DIST[k])/8- j/8) + abs(((int)DIST[k]%8) - j%8) + 1;
-                    double tem_PoptoDistij = (tem_PoptoDisti + tem_PoptoDistj)/2; //case 2
-                    if (tem_PoptoDistij<PoptoDistij){
-                        PoptoDistij=tem_PoptoDistij;
-                    }
-                    /*if(tem_PoptoDisti<PoptoDisti){
-                        PoptoDisti=tem_PoptoDisti;
-                    }
-                    if(tem_PoptoDistj<PoptoDistj){
-                        PoptoDistj=tem_PoptoDistj;
-                    }*/
-                }
-                //L_tubeLength[i][j] =  pow(PoptoDistj,POW);
-                //L_tubeLength[j][i] =  pow(PoptoDisti,POW);
-                L_tubeLength[j][i] = L_tubeLength[i][j] = pow(PoptoDistij,POW);
-            }else{
-                L_tubeLength[i][j] = L_tubeLength[j][i] = INF;
-            }
+            D_tubeThickness[i][j] = thickness[i][j];
+            L_tubeLength[i][j] = length[i][j];
         }
     }
-
     fclose(fpN);
 }
 
@@ -139,8 +101,7 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
     unsigned int red_path_count = 0;
     unsigned int redviolet_path_count = 0;
     FILE *fpN;
-    bool fig_DIST = false;
-    bool fig_SOURCE = false;
+
 
     char filename[FILENAMESIZE];
 
@@ -153,9 +114,7 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
     }
     fprintf(fpN, "*Vertices	%d\n", node);
     for (i = 0; i < node; i++)
-    {
-        double line=(double)(i%8)/10.0 + 0.15;
-        double row=(double)(i/8)/10.0 + 0.15;
+    {   
         for(int j=0;j<DIST.size();j++){
             if(i==DIST[j]){
                 fig_DIST=true;
@@ -166,15 +125,15 @@ void SetTopologyColor(int node, vector<int> &SOURCE, vector<int> &DIST, vector<v
                 fig_SOURCE=true;
             }
         }        
-        if (fig_SOURCE || fig_DIST )
+        if (fig_SOURCE || fig_DIST)
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic Black\n",
-                    i + 1, i + 1, line, row );
+                    i + 1, i + 1, line[i], row[i] );
         }
         else
         {
             fprintf(fpN, "%d \"%d\" %.4lf %.4lf ic White\n",
-                    i + 1, i + 1, line, row );
+                    i + 1, i + 1, line[i], row[i] );
         }
         fig_DIST=false;
         fig_SOURCE=false;
