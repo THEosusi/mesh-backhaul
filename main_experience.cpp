@@ -17,6 +17,7 @@
 #include "MT.h"
 #include "ICCG.h"
 #include "Pajeck_experience.h"
+#include "output.h"
 #include <cmath>
 
 #define INF 10000.0		// Infinite length representation. Exclude L from the calculation, where L==INF
@@ -25,9 +26,9 @@
 #define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
 #define MAX_FLOW 10.0
-#define coefficient_tanh 10 //  coefficient of tanh
+#define coefficient_tanh 1 //  coefficient of tanh
 
-#define SIG 1 // change of method 0:|Q|, 1:sig
+#define SIG 0 // change of method 0:|Q|, 1:sig
 #define NUM 1 // change of method 0:normal, 1:new
 
 
@@ -45,7 +46,7 @@ vector<double> P_tubePressure_sinkExcept;			   // p_i(t) without sink node
 vector<vector<double>> D_tubeThickness_deltaT;		   // D_ij(Δt)
 vector<vector<double>> pressureCoefficient;			   // Coeff. of p(t) derived from the simultaneous equations in Eq.(1) and Eq.(2)
 vector<vector<double>> pressureCoefficient_sinkExcept; // without sink node
-
+vector<vector<double>> capacity(4, vector<double>(4));
 // Sigmoid function
 vector<vector<double>> Q_tubeFlow_sigmoidOutput; // The buffer for storing sigmoid func. solutions
 
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
 	// Node
 	vector<double> Flow_SOURCE = {};
 	vector<int> SOURCE = {};
-	vector<int> DIST = {5};
+	vector<int> DIST = {3};
 	static int node = atoi(argv[1]);
 	static int node_except = node - DIST.size();
 
@@ -128,23 +129,24 @@ int main(int argc, char *argv[])
 	// Create simulation topology for Pajek
 	NodeConfigure(NET_file, node, SOURCE, DIST, D_tubeThickness, L_tubeLength);
 
-    /*for(int i = 0;i<6;i++){
-        for(int j=0;j<6;j++){
-            cout<<D_tubeThickness[i][j]<<",";
-        }
-        cout<<endl;
-    }
-    for(int i = 0;i<6;i++){
-        for(int j=0;j<6;j++){
-            cout<<L_tubeLength[i][j]<<",";
-        }
-        cout<<endl;
-    }*/
-
+    #if NUM == 0
+    capacity = {
+    {INF, INF, INF, INF},
+    {INF, INF, INF, INF},
+    {INF, INF, INF, INF},
+    {INF, INF, INF, INF}
+    };
+    #elif NUM == 1
+    capacity = {
+    {INF, 30.0, 20.0, INF},
+    {30.0, INF, 10.0, 30.0},
+    {20.0, 10.0, INF, 20.0},
+    {INF, 30.0, 20.0, INF}
+    };
+    #endif  
 	// PhysarumSolver Iteration Start
 	while (ct != num_loop)
 	{	
-
 		// change situation
 		/*if(ct==1500){
 			SOURCE = {30,35};
@@ -154,8 +156,9 @@ int main(int argc, char *argv[])
 			Q_allFlow += flow_source;
 			}
 		}*/
-		// auto start = chrono::system_clock::now();
 
+		// auto start = chrono::system_clock::now();
+        Output(ct,Q_tubeFlow);
 		// Consider the case where the source and destination change during the loop.
 		// The following process* is described in the loop.
 		for(int i=0;i<SOURCE.size();i++){
@@ -181,7 +184,6 @@ int main(int argc, char *argv[])
 			fig_DIST=false;
 		}
 		// The following process* end
-
 		// Derive pressure gradient for each tube by simultaneous equations
 		// Start
 		for (i = 0; i < node; i++)
@@ -258,7 +260,6 @@ int main(int argc, char *argv[])
 			}
 			fig_DIST=false;
 		}
-
 		// ICCG:Incomplete Cholesky Conjugate Gradient method
 		// This method can solve the sparse matrix linear system of equations inherent to the finite element method with low capacity and high speed.
 		if (ICCG(pressureCoefficient_sinkExcept, Q_Kirchhoff_sinkExcept, P_tubePressure_sinkExcept, node_except, test_iter, eps) == 0)
@@ -323,9 +324,9 @@ int main(int argc, char *argv[])
 				if (L_tubeLength[i][j] != INF)
 				{	
                     #if SIG == 0
-					D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//Q
+                    D_tubeThickness_deltaT[i][j] = (fabs(Q_tubeFlow[i][j]) - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//Q
                     #elif SIG == 1
-                    D_tubeThickness_deltaT[i][j] = (fabs(Q_tubeFlow[i][j]) - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//sig
+                    D_tubeThickness_deltaT[i][j] = (Q_tubeFlow_sigmoidOutput[i][j] - (degeneracyEffect * D_tubeThickness[i][j])) * delta_time;//sig
                     #endif	
 				}
 			}
@@ -340,35 +341,13 @@ int main(int argc, char *argv[])
                     #if NUM == 0
                         D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]);
                     #elif NUM == 1
-					    D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  tanh((MAX_FLOW - fabs(Q_tubeFlow[i][j]))/coefficient_tanh);
+					    D_tubeThickness[i][j] = D_tubeThickness[i][j] + (D_tubeThickness_deltaT[i][j]) *  tanh((capacity[i][j] - fabs(Q_tubeFlow[i][j]))*coefficient_tanh);
                     #endif
 				}			
 			}
 		}
-		//cout<<Q_tubeFlow[38][46]<<"ww"<<Q_tubeFlow[38][37]<<"ww"<<Q_tubeFlow[38][30]<<"ww"<<Q_tubeFlow[38][39]<<endl;
-		//cout<<D_tubeThickness[38][37]<<endl;
-		//cout<<D_tubeThickness[29][37]<<"dd"<<D_tubeThickness[38][37]<<"dd"<<D_tubeThickness[60][59]<<endl;
-		cout<<Q_tubeFlow[0][1]<<"aa"<<Q_tubeFlow[0][2]<<"aa"<<Q_tubeFlow[1][2]<<"aa"<<Q_tubeFlow[1][3]<<"aa"<<Q_tubeFlow[1][4]<<"aa"<<Q_tubeFlow[2][4]<<endl;
-        cout<<Q_tubeFlow[3][4]<<"bb"<<Q_tubeFlow[3][5]<<"bb"<<Q_tubeFlow[4][5]<<endl;
-		//cout<<Q_tubeFlow[45][37]<<"aa"<<Q_tubeFlow[36][37]<<"aa"<<Q_tubeFlow[29][37]<<"aa"<<Q_tubeFlow[38][37]<<endl;
-		//cout<<Q_tubeFlow[26][18]<<"bb"<<Q_tubeFlow[17][18]<<"bb"<<Q_tubeFlow[10][18]<<"bb"<<Q_tubeFlow[19][18]<<endl;
-		//cout<<Q_tubeFlow[53][61]<<"cc"<<Q_tubeFlow[53][52]<<"cc"<<Q_tubeFlow[53][45]<<"cc"<<Q_tubeFlow[53][54]<<endl;
-		//cout<<D_tubeThickness[53][61]<<"dd"<<D_tubeThickness[53][52]<<"dd"<<D_tubeThickness[53][45]<<"dd"<<D_tubeThickness[53][54]<<endl;
-		//cout<<Q_tubeFlow[45][53]<<"ww"<<Q_tubeFlow[45][44]<<"ww"<<Q_tubeFlow[45][37]<<"ww"<<Q_tubeFlow[45][46]<<endl;
-		//cout<<Q_tubeFlow[46][54]<<"oo"<<Q_tubeFlow[46][45]<<"oo"<<Q_tubeFlow[46][38]<<"oo"<<Q_tubeFlow[46][47]<<endl;
-		//cout<<Q_tubeFlow[44][52]<<"dd"<<Q_tubeFlow[44][43]<<"dd"<<Q_tubeFlow[44][36]<<"dd"<<Q_tubeFlow[44][45]<<endl;
-		//cout<<Q_tubeFlow[36][44]<<"ee"<<Q_tubeFlow[36][35]<<"dd"<<Q_tubeFlow[36][28]<<"dd"<<Q_tubeFlow[36][37]<<endl;
-		/*for(int i=25;i<43;i++){
-			for(int j=0;j<node;j++)
-			cout<<i<<"ww"<<j<<"ww"<<L_tubeLength[i][j]<<endl;
-		}*/
-		/*for(int i=0;i<node;i++){
-			cout<<i<<"aa"<<Q_Kirchhoff[i]<<endl;
-		}*/
-		/*for(int i=0;i<node_except;i++){
-			cout<<i<<"aa"<<Q_Kirchhoff_sinkExcept[i]<<endl;
-		}*/
-		//cout<<Q_tubeFlow[27][19]<<"cc"<<Q_tubeFlow[18][19]<<"cc"<<Q_tubeFlow[11][19]<<"cc"<<Q_tubeFlow[20][19]<<endl;
+
+		cout<<Q_tubeFlow[0][1]<<"aa"<<Q_tubeFlow[0][2]<<"aa"<<Q_tubeFlow[1][2]<<"aa"<<Q_tubeFlow[1][3]<<"aa"<<Q_tubeFlow[2][3]<<endl;
 		// Write here the process you want to do every 'plot' times
 		if ((ct + 1) % plot == 0)
 		{
