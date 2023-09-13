@@ -27,10 +27,10 @@
 #define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
 #define MAX_FLOW 10.0
-#define coefficient_tanh 1 //  coefficient of tanh
+#define coefficient_tanh 0.05 //  coefficient of tanh
 
 #define SIG 0 // change of method 0:|Q|, 1:sig
-#define NUM 0 // change of method 0:normal, 1:new
+#define NUM 1 // change of method 0:normal, 1:new
 
 
 // Basis parameter
@@ -138,10 +138,10 @@ int main(int argc, char *argv[])
     };
     #elif NUM == 1
     capacity = {
-    {INF, 30.0, 20.0, INF},
-    {30.0, INF, 10.0, 30.0},
-    {20.0, 10.0, INF, 20.0},
-    {INF, 30.0, 20.0, INF}
+    {INF, 3000.0, 2000.0, INF},
+    {3000.0, INF, 1000.0, 3000.0},
+    {2000.0, 1000.0, INF, 2000.0},
+    {INF, 3000.0, 2000.0, INF}
     };
     #endif  
 	// PhysarumSolver Iteration Start
