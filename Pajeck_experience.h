@@ -23,11 +23,11 @@ void NodeConfigure(const char *NET_file, int node, vector<int> &SOURCE, vector<i
     bool fig_SOURCE=false;
     vector<double> line = {0.05, 0.35, 0.35, 0.65, 0.65, 0.95};
     vector<double> row = {0.5, 0.75, 0.25, 0.75, 0.25, 0.5};
-    vector<vector<double>> thickness = {
-    {0, 0.5, 0.5, 0},
-    {0.5, 0, 0.5, 0.5},
-    {0.5, 0.5, 0, 0.5},
-    {0, 0.5, 0.5, 0}
+    vector<vector<double>> thickness = {// 40の時0.5
+    {0, 0.0625, 0.0625, 0},
+    {0.0625, 0, 0.0625, 0.0625},
+    {0.0625, 0.0625, 0, 0.0625},
+    {0, 0.0625, 0.0625, 0}
     };
     vector<vector<double>> length = {
     {INF, 1.0, 3.0, INF},

@@ -30,7 +30,7 @@
 #define coefficient_tanh 1 //  coefficient of tanh
 
 #define SIG 0 // change of method 0:|Q|, 1:sig
-#define NUM 0 // change of method 0:normal, 1:new
+#define NUM 1 // change of method 0:normal, 1:new
 
 
 // Basis parameter

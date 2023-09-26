@@ -27,7 +27,7 @@
 #define delta_time 0.01 //Δt scale default 0.01
 #define plot 1			// Number of loops you want to plot
 #define MAX_FLOW 10.0
-#define coefficient_tanh 0.05 //  coefficient of tanh
+#define coefficient_tanh 1 //  coefficient of tanh
 
 #define SIG 0 // change of method 0:|Q|, 1:sig
 #define NUM 1 // change of method 0:normal, 1:new
