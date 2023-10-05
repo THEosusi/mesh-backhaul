@@ -16,6 +16,7 @@
 #include "pch.h"
 #include "MT.h"
 #include "ICCG.h"
+#include "BiCGSTAB.h"
 #include "Pajeck_experience.h"
 #include "output.h"
 #include "RGAP.h"
@@ -42,11 +43,8 @@ vector<vector<double>> L_tubeLength;	// L_ij(t)
 
 
 // To calculate parameter
-vector<double> Q_Kirchhoff_sinkExcept;				   // ΣQ without sink node
-vector<double> P_tubePressure_sinkExcept;			   // p_i(t) without sink node
 vector<vector<double>> D_tubeThickness_deltaT;		   // D_ij(Δt)
 vector<vector<double>> pressureCoefficient;			   // Coeff. of p(t) derived from the simultaneous equations in Eq.(1) and Eq.(2)
-vector<vector<double>> pressureCoefficient_sinkExcept; // without sink node
 // Sigmoid function
 vector<vector<double>> Q_tubeFlow_sigmoidOutput; // The buffer for storing sigmoid func. solutions
 
@@ -62,7 +60,7 @@ vector<int> SOURCE;
 vector<int> DIST;
 
 // Prototype declaration
-void Initialize(int,int);
+void Initialize(int);
 void VectorFree(int);
 
 // Program Start
@@ -86,9 +84,8 @@ int main(int argc, char *argv[])
 	// Node
 	vector<double> Flow_SOURCE = {};
 	vector<int> SOURCE = {};
-	vector<int> DIST = {3};
+	vector<int> DIST = {2,3};
 	static int node = atoi(argv[1]);
-	static int node_except = node - DIST.size();
 
 	// flag for DIST
 	bool fig_DIST = false;
@@ -105,7 +102,7 @@ int main(int argc, char *argv[])
 	const char *NET_file = argv[2];
 
 	// Vectors initialization
-	Initialize(node, node_except);
+	Initialize(node);
 
 	// Setting for Q_allFlow and num_loop
 	int numbers_source;
@@ -212,79 +209,13 @@ int main(int argc, char *argv[])
 			}
 			k++;
 		}
-		for (i = 0, a = 0; i < node, a < node_except; i++, a++)
-		{	
-			for(int k=0;k<DIST.size();k++){
-				if (i == DIST[k] && DIST[k] != node)
-				{
-					fig_DIST=true;
-				}
-			}
-			if(fig_DIST){
-				i++;
-			}
-			fig_DIST=false;
-			for (j = 0, b = 0; j < node, b < node_except; j++, b++)
-			{
 
-				for(int k=0;k<DIST.size();k++){
-					if(j==DIST[k]){
-						fig_DIST=true;
-					}
-				}
-				if (fig_DIST)
-				{
-					j++;
-					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];// it may happen an error especially in case multi sink and a and b.
-				}
-				else
-				{
-					pressureCoefficient_sinkExcept[a][b] = pressureCoefficient[i][j];
-				}
-				fig_DIST=false;
-			}
-		}
-		a = 0;
-		for (i = 0; i < node; i++)
-		{
-			for(int k=0;k<DIST.size();k++){
-				if(i==DIST[k]){
-					fig_DIST=true;
-				}
-			}
 
-			if (!fig_DIST)
-			{
-				Q_Kirchhoff_sinkExcept[a] = Q_Kirchhoff[i];
-				a++;
-			}
-			fig_DIST=false;
-		}
 		// ICCG:Incomplete Cholesky Conjugate Gradient method
 		// This method can solve the sparse matrix linear system of equations inherent to the finite element method with low capacity and high speed.
-		if (ICCG(pressureCoefficient_sinkExcept, Q_Kirchhoff_sinkExcept, P_tubePressure_sinkExcept, node_except, test_iter, eps) == 0)
+		if (BiCGSTAB(pressureCoefficient, Q_Kirchhoff, P_tubePressure, node, test_iter, eps) == 0)
 		{
 			break;
-		}
-
-		a = 0;
-		for (i = 0; i < node; i++)
-		{
-			for(int j=0;j<DIST.size();j++){
-				if(i==DIST[j]){
-					fig_DIST=true;
-				}
-			}
-			if (fig_DIST)
-			{
-				P_tubePressure[i] = 0.0;
-			}
-			else
-			{
-				P_tubePressure[i] = P_tubePressure_sinkExcept[a];
-				a++;
-			}
-			fig_DIST=false;
 		}
 
 
@@ -363,7 +294,7 @@ int main(int argc, char *argv[])
 }
 
 // vector initialize
-void Initialize(int node, int node_except)
+void Initialize(int node)
 {
 
 	// 1xN matrix
@@ -372,8 +303,7 @@ void Initialize(int node, int node_except)
 	P_tubePressure.resize(node);
 
 	// To calculate parameter
-	Q_Kirchhoff_sinkExcept.resize(node_except);
-	P_tubePressure_sinkExcept.resize(node_except);
+
 
 	// Pajek
 
@@ -386,7 +316,6 @@ void Initialize(int node, int node_except)
 	// To calculate parameter
 	D_tubeThickness_deltaT.resize(node);
 	pressureCoefficient.resize(node);
-	pressureCoefficient_sinkExcept.resize(node_except);
 
 	// Sigmoid function
 	Q_tubeFlow_sigmoidOutput.resize(node);
@@ -404,10 +333,6 @@ void Initialize(int node, int node_except)
 		Q_tubeFlow_sigmoidOutput[i].resize(node);
 	}
 
-	for (int i = 0; i < node_except; i++)
-	{
-		pressureCoefficient_sinkExcept[i].resize(node_except);
-	}
 }
 
 // vector swap
@@ -424,9 +349,7 @@ void VectorFree(int node)
 	vector<double>().swap(Q_Kirchhoff);
 	vector<double>().swap(P_tubePressure);
 
-	// To calculate parameter
-	vector<double>().swap(Q_Kirchhoff_sinkExcept);
-	vector<double>().swap(P_tubePressure_sinkExcept);
+
 
 	// Pajek
 
@@ -439,7 +362,6 @@ void VectorFree(int node)
 	// To calculate parameter
 	vector<vector<double>>().swap(D_tubeThickness_deltaT);
 	vector<vector<double>>().swap(pressureCoefficient);
-	vector<vector<double>>().swap(pressureCoefficient_sinkExcept);
 
 	// Sigmoid function
 	vector<vector<double>>().swap(Q_tubeFlow_sigmoidOutput);

@@ -17,6 +17,7 @@
 #include "MT.h"
 #include "ICCG.h"
 #include "Pajeck_experience.h"
+#include "BiCGSTAB.h"
 #include "output.h"
 #include "RGAP.h"
 #include <cmath>
@@ -262,7 +263,7 @@ int main(int argc, char *argv[])
 		}
 		// ICCG:Incomplete Cholesky Conjugate Gradient method
 		// This method can solve the sparse matrix linear system of equations inherent to the finite element method with low capacity and high speed.
-		if (ICCG(pressureCoefficient_sinkExcept, Q_Kirchhoff_sinkExcept, P_tubePressure_sinkExcept, node_except, test_iter, eps) == 0)
+		if (BiCGSTAB(pressureCoefficient, Q_Kirchhoff, P_tubePressure,node, test_iter, eps) == 0)
 		{
 			break;
 		}
